@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        .parent{
+            width: 80%;
+            margin: auto;
+        }
+        .child{
+            height: 40px;
+            background-color: white;
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            line-height: 40px;
+            padding: 0 10px;
+            box-shadow: 1px 1px 5px rgba(170,170,170,0.5);
+        }
+        .child>*{
+            display: inline-block;
+        }
+        .child>*:nth-child(1){
+            float: left;
+        }
+        .child>*:nth-child(2){
+            float: right;
+        }
+        
+        button{
+            background-color: red;
+            border: none;
+            height: 20px;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0px 1px 5px rgba(0,0,0,0.2);
+        }
+        button:hover{
+            background-color: white;
+            color: red;
+            box-shadow: 0px 1px 25px rgba(0,0,0,0.2);
+        }
+    
+    @-webkit-keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    @keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    
+    /* css for sortable table row */
+     
+    .make-sortable .ui-sortable-helper {
+        background-color: rgba(171, 171, 171, 0.1) !important;
+        display: table;
+        -webkit-transition: none !important;
+                transition: none !important;
+        -webkit-animation: pulse 0.4s alternate infinite;
+                animation: pulse 0.4s alternate infinite;
+    }
+    
+     .slide-placeholder { 
+         border: none;
+         margin-bottom: 5px;
+         background-color: rgba(171, 171, 171, 0.1); 
+         position: relative;
+     }
+     .slide-placeholder:after {
+        content: " ";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+     }
+     
+     .make-sortable > *:first-child .up, .make-sortable > *:last-child .down{
+        color: #aaa !important;
+        border-color: #aaa !important;
+        cursor: not-allowed;
+    }
+    .sortable{
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+        position: relative;
+    }
+    .z-index-10{
+        z-index: 10;
+    }
+        
+        h3{
+            width: 80%;
+            margin: 15px auto;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+   <h3>Sortable elements using Jquery UI</h3>
+    <div class="parent make-sortable">
+        <div class="child sortable">
+            <div>A</div>
+            <div>
+                 <button class="up" onclick="upSectionDiv(this)">up</button>
+                <button  class="down" onclick="downSectionDiv(this)">down</button>
+            </div>
+        </div>
+        <div class="child sortable">
+            <div>B</div>
+            <div>
+                 <button class="up" onclick="upSectionDiv(this)">up</button>
+                <button  class="down" onclick="downSectionDiv(this)">down</button>
+            </div>
+        </div>
+        <div class="child sortable">
+            <div>C</div>
+            <div>
+                 <button class="up" onclick="upSectionDiv(this)">up</button>
+                <button  class="down" onclick="downSectionDiv(this)">down</button>
+            </div>
+        </div>
+        <div class="child sortable">
+            <div>D</div>
+            <div>
+                <button class="up" onclick="upSectionDiv(this)">up</button>
+                <button  class="down" onclick="downSectionDiv(this)">down</button>
+            </div>
+        </div>
+    </div>
+   
+<script src="jquery-3.3.1.min.js"></script>
+<script src="jquery-ui.min.js"></script>
+<script>
+
+$( ".make-sortable" ).sortable({  
+    revert: 200,
+    forcePlaceholderSize: true,
+    placeholder: "slide-placeholder",
+    cursor: "move",
+    start: function( event, ui ) {
+                placeholderHeight = ui.item.height(); 
+                ui.placeholder.height(placeholderHeight);
+                $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+           },
+    change: function(event, ui) {
+                ui.placeholder.stop().height(0).animate({height: ui.item.height()}, 300);
+                placeholderAnimatorHeight = parseInt($(".slide-placeholder-animator").attr("data-height"));
+
+                $(".slide-placeholder-animator").stop().height(placeholderAnimatorHeight).animate({height: 0}, 300, function() {
+                    $(this).remove();
+                    placeholderHeight = ui.item.height();
+                    $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+                });
+
+            },
+    stop: function(e, ui) {
+                $(".slide-placeholder-animator").remove();
+            }
+
+ }).disableSelection();
+        
+var upSectionDiv = function(el){
+	var div = $(el).closest(".sortable");
+	var divHeight = div.outerHeight(true)+"px";
+	var prevDivHeight = div.prev().outerHeight(true)+"px";
+    
+	if (div.index() != 0){ 
+    	div.addClass("z-index-10");
+    	
+    	div.animate({top: '-'+prevDivHeight}, 500);
+    	div.prev().animate({top: divHeight}, 500, function(){
+    		div.css('top', '0px');
+    		div.prev().css('top', '0px');
+    		div.insertBefore(div.prev());
+    		
+    		div.removeClass("z-index-10");
+        });
+    }
+};
+
+
+var downSectionDiv = function(el){
+	var div = $(el).closest(".sortable");
+	var divHeight = div.outerHeight(true)+"px";
+	var nextDivHeight = div.next().outerHeight(true)+"px"; 
+	
+	var lastDiv = $(el).closest(".make-sortable").children().length-1; 
+	if (div.index() != lastDiv){ 
+    	div.addClass("z-index-10");
+    	
+    	div.animate({top: nextDivHeight}, 500);
+    	div.next().animate({top: '-'+divHeight}, 500, function(){
+    		div.css('top', '0px');
+    		div.next().css('top', '0px');
+    		div.insertAfter(div.next());
+    		
+    		div.removeClass("z-index-10");
+        });
+    }
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        table{
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+            color: #333;
+        }
+        thead {
+            border-bottom: 5px solid whitesmoke;
+        }
+        tr{
+            background-color: white;
+            height: 40px;
+            box-shadow: 0px 1px 5px rgba(0,0,0,0.2);
+        }
+        
+        td, th{
+            border-bottom: 1px solid #fff;
+            width: 100px;
+        }
+        td:first-child, td:nth-child(4), td:last-child, th{
+            text-align: center;
+            width: 100px;
+        }
+        td:nth-child(5), td:nth-child(3){
+            text-align: right;
+            width: 150px;
+        }
+        button{
+            background-color: red;
+            border: none;
+            height: 25px;
+            width: 25px;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0px 1px 5px rgba(0,0,0,0.2);
+        }
+        button:hover{
+            background-color: white;
+            color: red;
+            box-shadow: 0px 1px 25px rgba(0,0,0,0.2);
+        }
+        h3{
+            width: 80%;
+            margin: 15px auto;
+            text-align: center;
+        }
+        
+    
+    @-webkit-keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    @keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    
+    /* css for sortable table row */
+     
+    .make-table-sortable tr{
+        display: flex;
+    }
+        
+    .make-table-sortable tbody tr{
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+        position: relative;
+    }
+
+    .make-table-sortable th, .make-table-sortable td{
+        flex-grow: 1;
+    }
+    .make-table-sortable .ui-sortable-helper {
+        background-color: rgba(171, 171, 171, 0.1) !important;
+        display: table;
+        -webkit-transition: none !important;
+                transition: none !important;
+        -webkit-animation: pulse 0.4s alternate infinite;
+                animation: pulse 0.4s alternate infinite;
+    }
+    
+    .make-table-sortable tbody tr:first-child .up, .make-table-sortable tbody tr:last-child .down{
+        color: #aaa !important;
+        border-color: #aaa !important;
+        cursor: not-allowed;
+    }
+    
+    .sortable-row-placeholder { 
+        border: none;
+        background-color: rgba(171, 171, 171, 0.1); 
+    }
+     
+    .z-index-10{
+        z-index: 10;
+    }
+
+    </style>
+</head>
+<body>
+   <h3>Sortable table row using Jquery UI</h3>
+    <table class="make-table-sortable">
+        <thead>
+            <tr>
+                <th>SL No.</th>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Monitor</td>
+                <td>8000</td>
+                <td>1</td>
+                <td>8000</td>
+                <td>
+                    <button onclick="upRow(this)" class="up">U</button>
+                    <button onclick="downRow(this)" class="down">D</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Keyboard</td>
+                <td>350</td>
+                <td>1</td>
+                <td>350</td>
+                <td>
+                    <button onclick="upRow(this)" class="up">U</button>
+                    <button onclick="downRow(this)" class="down">D</button>
+                </td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Mouse</td>
+                <td>300</td>
+                <td>1</td>
+                <td>300</td>
+                <td>
+                    <button onclick="upRow(this)" class="up">U</button>
+                    <button onclick="downRow(this)" class="down">D</button>
+                </td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>RAM</td>
+                <td>2000</td>
+                <td>1</td>
+                <td>2000</td>
+                <td>
+                    <button onclick="upRow(this)" class="up">U</button>
+                    <button onclick="downRow(this)" class="down">D</button>
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Hard Disk</td>
+                <td>4500</td>
+                <td>1</td>
+                <td>4500</td>
+                <td>
+                    <button onclick="upRow(this)" class="up">U</button>
+                    <button onclick="downRow(this)" class="down">D</button>
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5"><button onclick="addRow()">+</button></td>
+            </tr>
+        </tfoot>
+    </table>
+    <script src="jquery-3.3.1.min.js"></script>
+    <script src="jquery-ui.min.js"></script>
+    <script>
+
+        /*$('td').each(function () {
+            var cell = $(this);
+            cell.outerWidth(parseInt(cell.outerWidth(true))+"px");
+        });*/
+        $(".make-table-sortable").find("th").each(function(i, e){
+            $(this).css("line-height", $(this).height()+"px");
+        })
+        $(".make-table-sortable").find("td").each(function(i, e){
+            $(this).css("line-height", $(this).height()+"px");
+        })
+        
+        $( ".make-table-sortable tbody" ).sortable({  
+            revert: 200,
+            items: '> tr',
+            forcePlaceholderSize: true,
+            placeholder: "sortable-row-placeholder",
+            cursor: "move",
+            start: function( event, ui ) {
+                placeholderHeight = ui.item.height(); 
+                ui.placeholder.height(placeholderHeight);
+                $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+            },
+            change: function(event, ui) {
+                        ui.placeholder.stop().height(0).animate({height: ui.item.height()}, 300);
+                        placeholderAnimatorHeight = parseInt($(".slide-placeholder-animator").attr("data-height"));
+
+                        $(".slide-placeholder-animator").stop().height(placeholderAnimatorHeight).animate({height: 0}, 300, function() {
+                            $(this).remove();
+                            placeholderHeight = ui.item.height();
+                            $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+                        });
+
+                    },
+            stop: function(e, ui) {
+                        $(".slide-placeholder-animator").remove();
+                    }
+
+         }).disableSelection();
+
+
+        
+        var upRow = function(el){
+            var row = $(el).closest("tr");
+            var rowHeight = $(el).closest("tr").height()+"px";
+
+            if (row.index() != 0){ 
+                row.addClass("z-index-10");
+
+                row.animate({top: '-'+rowHeight}, 500);
+                row.prev().animate({top: rowHeight}, 500, function(){
+                    row.css('top', '0px');
+                    row.prev().css('top', '0px');
+                    row.insertBefore(row.prev());
+
+                    row.removeClass("z-index-10");
+                });
+            }
+        };
+
+        var downRow = function(el){
+            var row = $(el).closest("tr");
+            var rowHeight = $(el).closest("tr").height()+"px";
+
+            var lastRow = $(el).closest("tbody").children().length-1;
+            if (row.index() != lastRow){ 
+                row.addClass("z-index-10");
+
+                row.animate({top: rowHeight}, 500);
+                row.next().animate({top: '-'+rowHeight}, 500, function(){
+                    row.css('top', '0px');
+                    row.next().css('top', '0px');
+                    row.insertAfter(row.next());
+
+                    row.removeClass("z-index-10");
+                });
+            }
+        };
+    </script>
+    <script>
+        var addRow = function(){
+            var html =  '<tr>'
+                        +    '<td>5</td>'
+                        +    '<td>Hard Disk</td>'
+                        +    '<td>4500</td>'
+                        +    '<td>1</td>'
+                        +    '<td>4500</td>'
+                        +    '<td>'
+                        +        '<button onclick="upRow(this)" class="up">U</button>'
+                        +        '<button onclick="downRow(this)" class="down">D</button>'
+                        +    '</td>'
+                        +'</tr>';
+            $(".make-table-sortable tbody").append(html);
+            
+            $(".make-table-sortable").find("td").each(function(i, e){
+            $(this).css("line-height", $(this).height()+"px");
+        })
+            /*$('td').each(function () {
+            var cell = $(this);
+            cell.outerWidth(parseInt(cell.outerWidth(true)+"px"));
+        });*/
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+
+    
+    @-webkit-keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    @keyframes pulse {
+      100% { -webkit-transform: scale(0.9); transform: scale(0.9); } 
+    }
+    
+    /* css for sortable table row */
+    
+    .make-table-sortable tbody tr td{
+        -ms-flex-negative: 0;
+            flex-shrink: 0;
+    }
+    
+    .make-table-sortable tbody tr{
+        cursor: move; /* fallback if grab cursor is unsupported */
+        cursor: grab;
+        cursor: -moz-grab;
+        cursor: -webkit-grab;
+        position: relative;
+    }
+    
+    .flex-basis-100p{
+        -ms-flex-preferred-size: 100%;
+            flex-basis: 100%;
+    }
+    
+    .flex-basis-150{
+        -ms-flex-preferred-size: 150px;
+            flex-basis: 150px;
+    }
+    .make-table-sortable .ui-sortable-helper {
+        background-color: rgba(171, 171, 171, 0.1) !important;
+        display: table;
+        -webkit-transition: none !important;
+                transition: none !important;
+        -webkit-animation: pulse 0.4s alternate infinite;
+                animation: pulse 0.4s alternate infinite;
+    }
+    
+    .make-table-sortable tbody tr:first-child .up, .make-table-sortable tbody tr:last-child .down{
+        color: #aaa !important;
+        border-color: #aaa !important;
+        cursor: not-allowed;
+    }
+    
+     .sortable-row-placeholder { 
+         border: none;
+         background-color: rgba(171, 171, 171, 0.1); 
+     }
+     
+     .action-column{
+        padding: 0 !important;
+    }
+    
+    /* css for sortable componentes except table */
+    
+    .make-sortable .ui-sortable-helper {
+        background-color: rgba(171, 171, 171, 0.1) !important;
+        display: table;
+        -webkit-transition: none !important;
+                transition: none !important;
+        -webkit-animation: pulse 0.4s alternate infinite;
+                animation: pulse 0.4s alternate infinite;
+    }
+    
+     .slide-placeholder { 
+         border: none;
+         margin-bottom: 10px;
+         background-color: rgba(171, 171, 171, 0.1); 
+         position: relative;
+     }
+     .slide-placeholder:after {
+        content: " ";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+     }
+     
+     .make-sortable > *:first-child .up, .make-sortable > *:last-child .down{
+        color: #aaa !important;
+        border-color: #aaa !important;
+        cursor: not-allowed;
+    }
+     
+</style>
+<script src="/assets/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+<script src="/vendor/jquery-smart-wizard/jquery.smartWizard.js"></script>
+<script src="/assets/js/form-wizard.js"></script>
+<script src="/assets/js/audit.js"></script>
+<script>
+    InitHandlers();
+    FormWizard.init();
+    
+    $(".btn-save").hide();
+    
+    /* start:: make table rows sortable. 
+        1. add "make-table-sortable" class on table 
+        2. "up", "down" class in buttons & add "upRow(this)", "downRow(this)" on buttons event
+        3. "flex-basis" css in tds' as td width 
+    */
+    
+    $('td, th', '.make-table-sortable').each(function () {
+        var cell = $(this);
+        cell.width(cell.width());
+    });
+    
+    $(".make-table-sortable").on("click", ".up, .down", function(){
+        $(".make-table-sortable tbody tr").each(function(){
+            var lastTd = $(this).find("td:last-child")
+            $(lastTd).css("line-height", $(lastTd).height()-1+"px");
+        })
+    })
+    
+    $( ".make-table-sortable tbody" ).sortable({  
+        revert: 200,
+        items: '> tr',
+        forcePlaceholderSize: true,
+        placeholder: "sortable-row-placeholder",
+        cursor: "move",
+        start: function( event, ui ) { 
+                ui.placeholder.height(ui.item.height());
+                $(this).closest(".table").removeClass("table-hover");
+                // Build a placeholder cell that spans all the cells in the row
+                var cellCount = 0;
+                $('td, th', ui.helper).each(function () {
+                    // For each TD or TH try and get it's colspan attribute, and add that or 1 to the total
+                    var colspan = 1;
+                    var colspanAttr = $(this).attr('colspan');
+                    if (colspanAttr > 1) {
+                        colspan = colspanAttr;
+                    }
+                    cellCount += colspan;
+                });
+                // Add the placeholder UI - note that this is the item's content, so TD rather thanTR
+                ui.placeholder.html('<td colspan="' + cellCount + '">&nbsp;</td>');
+               },
+        stop: function( event, ui ) {
+                $(this).closest(".table").addClass("table-hover");
+               }
+        
+     }).disableSelection();
+    
+    
+    
+    $( ".make-sortable" ).sortable({  
+        revert: 200,
+        forcePlaceholderSize: true,
+        placeholder: "slide-placeholder",
+        cursor: "move",
+        handle: ".sortable-header",
+        start: function( event, ui ) {
+                    placeholderHeight = ui.item.height(); 
+                    ui.placeholder.height(placeholderHeight);
+                    $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+               },
+        change: function(event, ui) {
+                    ui.placeholder.stop().height(0).animate({height: ui.item.height()}, 300);
+                    placeholderAnimatorHeight = parseInt($(".slide-placeholder-animator").attr("data-height"));
+                    
+                    $(".slide-placeholder-animator").stop().height(placeholderAnimatorHeight).animate({height: 0}, 300, function() {
+                        $(this).remove();
+                        placeholderHeight = ui.item.height();
+                        $('<div class="slide-placeholder-animator" data-height="' + placeholderHeight + '"></div>').insertAfter(ui.placeholder);
+                    });
+                    
+                },
+        stop: function(e, ui) {
+                    $(".slide-placeholder-animator").remove();
+                }
+        
+     }).disableSelection();
+    
+    /* end:: make table rows sortable. */
+    
+</script>
+<!-- start: Common Footer -->
+       <jsp:include page="/WEB-INF/view/common/commonfooter.jsp" />
+<!-- end: Common Footer -->
+
+
+
+
+
+
+
+
+
+
+
+
+var upRow = function(el){
+	var row = $(el).closest("tr");
+	var rowHeight = $(el).closest("tr").height()+"px";
+	var tbody = $(el).closest("tbody");
+
+    if (row.index() != 0){ 
+    	$(el).closest("table").removeClass("table-hover");
+    	row.addClass("display-flex");
+    	row.prev().addClass("display-flex");
+    	row.addClass("z-index-10");
+    	
+        row.animate({top: '-'+rowHeight}, 500);
+        row.prev().animate({top: rowHeight}, 500, function(){
+    		row.css('top', '0px');
+    		row.prev().css('top', '0px');
+    		row.insertBefore(row.prev());
+    		
+    		$(el).closest(".table").addClass("table-hover");
+    		tbody.children().removeClass("display-flex");
+    		row.removeClass("z-index-10");
+        });
+    }
+};
+
+var downRow = function(el){
+	var row = $(el).closest("tr");
+	var rowHeight = $(el).closest("tr").height()+"px";
+	var tbody = $(el).closest("tbody");
+	
+	var lastRow = $(el).closest("tbody").children().length-1;
+	if (row.index() != lastRow){ 
+    	$(el).closest("table").removeClass("table-hover");
+    	row.addClass("display-flex");
+    	row.next().addClass("display-flex");
+    	row.addClass("z-index-10");
+    	
+        row.animate({top: rowHeight}, 500);
+        row.next().animate({top: '-'+rowHeight}, 500, function(){
+    		row.css('top', '0px');
+    		row.next().css('top', '0px');
+    		row.insertAfter(row.next());
+    		
+    		$(el).closest(".table").addClass("table-hover");
+    		tbody.children().removeClass("display-flex");
+    		row.removeClass("z-index-10");
+        });
+    }
+};
+
+
+var upSectionDiv = function(el){
+	var mainDivClass = $(el).attr("mainDivClass");
+	var div = $(el).closest("." + mainDivClass);
+	var divHeight = div.height()+"px";
+	var prevDivHeight = div.prev().height()+"px";
+	
+	if (div.index() != 0){ 
+    	div.addClass("z-index-10");
+    	
+    	div.animate({top: '-'+prevDivHeight}, 500);
+    	div.prev().animate({top: divHeight}, 500, function(){
+    		div.css('top', '0px');
+    		div.prev().css('top', '0px');
+    		div.insertBefore(div.prev());
+    		
+    		div.removeClass("z-index-10");
+        });
+    }
+};
+
+
+var downSectionDiv = function(el){
+	var mainDivClass = $(el).attr("mainDivClass");
+	var div = $(el).closest("." + mainDivClass);
+	var divHeight = div.height()+"px";
+	var nextDivHeight = div.next().height()+"px";
+	
+	var lastDiv = $(el).closest("#sectionBlocks").children().length-1; 
+	if (div.index() != lastDiv){ 
+    	div.addClass("z-index-10");
+    	
+    	div.animate({top: nextDivHeight}, 500);
+    	div.next().animate({top: '-'+divHeight}, 500, function(){
+    		div.css('top', '0px');
+    		div.next().css('top', '0px');
+    		div.insertAfter(div.next());
+    		
+    		div.removeClass("z-index-10");
+        });
+    }
+};
